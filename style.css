@@ -56,7 +56,7 @@ body {
 }
 
 .wrap {
-  max-width: 780px;
+  max-width: 880px;
   margin: 0 auto;
   padding: 0 16px;
 }
@@ -176,7 +176,7 @@ h2 {
 
 table {
   width: 100%;
-  min-width: 620px;
+  min-width: 720px;
   border-collapse: collapse;
   font-size: 0.92rem;
 }
@@ -205,13 +205,13 @@ td.num {
 }
 
 td.dates {
-  width: 13rem;
+  width: 10.5rem;
   font-family: var(--mono);
   font-size: 0.85rem;
   white-space: nowrap;
 }
 
-td.owner  { width: 8rem; }
+td.owner  { width: 13rem; }
 td.status { width: 7.5rem; }
 
 .deadline,

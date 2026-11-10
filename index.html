@@ -3,30 +3,30 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Project Title · 15-418/618 Final Project</title>
-  <meta name="description" content="15-418/618 Fall 2026 final project: summary, schedule and status updates.">
+  <title>Parallel GPU Hash Tables · 15-418/618 Final Project</title>
+  <meta name="description" content="15-418/618 Fall 2026 final project: a concurrent GPU hash table in CUDA.">
   <link rel="stylesheet" href="style.css">
 </head>
 <!--
   Page template and styling: generated with an AI assistant (Claude), which the
-  course allows for the webpage (forum #254). Everything inside a class="todo"
-  span is for the team to write. Search this file for "TODO" before publishing.
+  course allows for the webpage (forum #254). The project text below is copied
+  from our proposal PDF (reports/15418_proposal.pdf).
 -->
 <body>
 
 <header class="site-head">
   <div class="wrap">
     <p class="eyebrow">15-418/618 Final Project · Fall 2026</p>
-    <h1><span class="todo">TODO: Project title</span></h1>
+    <h1>Parallel GPU Hash Tables: Thread Cooperation, Memory Access, and Contention</h1>
     <p class="team">
-      <span class="todo">TODO: Name (andrewid)</span>
+      Jiaxi Zhang (jiaxizha)
       <span class="amp">&amp;</span>
-      <span class="todo">TODO: Name (andrewid)</span>
+      Hongzheng Li (hongzhel)
     </p>
 
     <nav class="docs" aria-label="Project documents">
       <!-- When a report is ready: put the PDF in reports/ and turn its <span> into an <a class="doc">. -->
-      <a class="doc" href="reports/proposal.pdf">
+      <a class="doc" href="reports/15418_proposal.pdf">
         <span class="doc-name">Proposal</span><span class="doc-meta">PDF</span>
       </a>
       <span class="doc is-off" aria-disabled="true">
@@ -47,13 +47,17 @@
   <section id="summary">
     <h2>Summary</h2>
     <p>
-      <span class="todo">TODO: 2–3 sentences. What you plan to build or study, and on which parallel platform. A short summary of the proposal; the full write-up is the PDF above.</span>
+      We will implement and optimize a concurrent hash table in CUDA that supports parallel insertion,
+      look-up, and potentially deletion or supporting dynamic size. We will explore how collision
+      handling, atomic operations, and GPU memory access patterns affect performance. We will evaluate
+      throughput against CPU and baseline GPU implementations across different table sizes, load factors
+      and key distributions.
     </p>
 
     <dl class="facts">
-      <div><dt>Platform</dt><dd><span class="todo">TODO</span></dd></div>
-      <div><dt>Languages / APIs</dt><dd><span class="todo">TODO</span></dd></div>
-      <div><dt>Main goal</dt><dd><span class="todo">TODO</span></dd></div>
+      <div><dt>Platform</dt><dd>Multicore CPU host and CUDA-capable NVIDIA GPU on GHC</dd></div>
+      <div><dt>Languages / APIs</dt><dd>C++/CUDA; CUDA atomic operations and cooperative-group primitives</dd></div>
+      <div><dt>Main goal</dt><dd>60% of NVIDIA cuCollections’ performance under the same configuration</dd></div>
     </dl>
   </section>
 
@@ -83,15 +87,15 @@
             <td class="dates">Nov 9 – 15
               <span class="deadline">Proposal due Mon 11/9, 11:59 pm</span>
             </td>
-            <td class="plan" data-label="Plan"><span class="todo">TODO</span></td>
-            <td class="owner" data-label="Owner"><span class="todo">TODO</span></td>
+            <td class="plan" data-label="Plan">Submit proposal (Mon Nov 9). Confirm hardware access, record metadata and confirm interfaces. Build a CPU baseline reference, GPU initial insertion and lookup, and workload generator.</td>
+            <td class="owner" data-label="Owner">Jiaxi: hardware reference &amp; baseline reference.<br>Hongzheng: CUDA setup &amp; workload generator.</td>
             <td class="status" data-label="Status"><span class="badge doing">In progress</span></td>
           </tr>
           <tr>
             <td class="num">2</td>
             <td class="dates">Nov 16 – 22</td>
-            <td class="plan" data-label="Plan"><span class="todo">TODO</span></td>
-            <td class="owner" data-label="Owner"><span class="todo">TODO</span></td>
+            <td class="plan" data-label="Plan">Complete baseline tests, implement the first cooperative probing mechanism, collect initial experiment data, establish cuCollection comparisons.</td>
+            <td class="owner" data-label="Owner">Jiaxi: tests and comparison harness.<br>Hongzheng: cooperative implementation.<br>Both: experiment profiling.</td>
             <td class="status" data-label="Status"><span class="badge planned">Planned</span></td>
           </tr>
           <tr>
@@ -100,15 +104,15 @@
               <span class="deadline">Milestone due Mon 11/23, 11:59 pm</span>
               <span class="aside">Thanksgiving Thu 11/26</span>
             </td>
-            <td class="plan" data-label="Plan"><span class="todo">TODO</span></td>
-            <td class="owner" data-label="Owner"><span class="todo">TODO</span></td>
+            <td class="plan" data-label="Plan">Milestone report due Mon Nov 23. Begin mixed-operation support and targeted concurrency tests. Debugging and profiling is the main focus.</td>
+            <td class="owner" data-label="Owner">Jiaxi: mixed-operation semantics and tests.<br>Hongzheng: group-size and memory-access experiments.</td>
             <td class="status" data-label="Status"><span class="badge planned">Planned</span></td>
           </tr>
           <tr>
             <td class="num">4</td>
             <td class="dates">Nov 30 – Dec 6</td>
-            <td class="plan" data-label="Plan"><span class="todo">TODO</span></td>
-            <td class="owner" data-label="Owner"><span class="todo">TODO</span></td>
+            <td class="plan" data-label="Plan">Complete main experiment with mixed-operation validation, collect experiment data and measure performance. Start extended goals if the core goals are complete.</td>
+            <td class="owner" data-label="Owner">Both.</td>
             <td class="status" data-label="Status"><span class="badge planned">Planned</span></td>
           </tr>
           <tr>
@@ -117,8 +121,8 @@
               <span class="deadline">Final report due Thu 12/10, 11:59 pm</span>
               <span class="deadline">Poster session Fri 12/11</span>
             </td>
-            <td class="plan" data-label="Plan"><span class="todo">TODO</span></td>
-            <td class="owner" data-label="Owner"><span class="todo">TODO</span></td>
+            <td class="plan" data-label="Plan">Final report due Thu Dec 10; poster session Fri Dec 11. Consolidate the final results. Complete final report and prepare the poster presentation.</td>
+            <td class="owner" data-label="Owner">Both.</td>
             <td class="status" data-label="Status"><span class="badge planned">Planned</span></td>
           </tr>
         </tbody>
@@ -132,7 +136,7 @@
     <ol class="log">
       <li>
         <time datetime="2026-11-09">Nov 9</time>
-        <div><span class="todo">TODO: e.g. proposal submitted</span></div>
+        <div>Project proposal posted (<a href="reports/15418_proposal.pdf">PDF</a>).</div>
       </li>
     </ol>
   </section>
