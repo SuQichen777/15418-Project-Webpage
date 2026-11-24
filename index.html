@@ -10,7 +10,7 @@
 <!--
   Page template and styling: generated with an AI assistant (Claude), which the
   course allows for the webpage (forum #254). The project text below is copied
-  from our proposal PDF (reports/15418_proposal.pdf).
+  from our proposal and milestone PDFs (reports/).
 -->
 <body>
 
@@ -29,9 +29,9 @@
       <a class="doc" href="reports/15418_proposal.pdf">
         <span class="doc-name">Proposal</span><span class="doc-meta">PDF</span>
       </a>
-      <span class="doc is-off" aria-disabled="true">
-        <span class="doc-name">Milestone</span><span class="doc-meta">due Nov 23</span>
-      </span>
+      <a class="doc" href="reports/15418_milestone_report.pdf">
+        <span class="doc-name">Milestone</span><span class="doc-meta">PDF</span>
+      </a>
       <span class="doc is-off" aria-disabled="true">
         <span class="doc-name">Final report</span><span class="doc-meta">due Dec 10</span>
       </span>
@@ -57,8 +57,19 @@
     <dl class="facts">
       <div><dt>Platform</dt><dd>Multicore CPU host and CUDA-capable NVIDIA GPU on GHC</dd></div>
       <div><dt>Languages / APIs</dt><dd>C++/CUDA; CUDA atomic operations and cooperative-group primitives</dd></div>
-      <div><dt>Main goal</dt><dd>60% of NVIDIA cuCollections’ performance under the same configuration</dd></div>
+      <div><dt>Goals (revised at milestone)</dt><dd>Plan: ≥75% of NVIDIA cuCollections <code>static_map</code> throughput with optimization rungs 1–5 done; fallback ≥60% with rungs 1–2; hope 90–100% with all 7 rungs. See the <a href="reports/15418_milestone_report.pdf">milestone report</a>.</dd></div>
     </dl>
+
+    <h3>Optimization ladder</h3>
+    <ol class="ladder">
+      <li><strong>Naive GPU baseline</strong>: one thread per operation, 64-bit packed key/value slot, single <code>atomicCAS</code> per claimed slot.</li>
+      <li><strong>Cooperative probing</strong>: a group of <em>G</em> ∈ {2, 4, 8, 16, 32} threads probes an aligned window per step.</li>
+      <li><strong>Memory layout</strong>: vectorized loads and AoS vs. SoA slot storage, evaluated with Nsight Compute DRAM bandwidth and sectors per request.</li>
+      <li><strong>Contention reduction</strong> for skewed or hot-key workloads: intra-warp key deduplication with <code>__match_any_sync</code> and early exit on found keys.</li>
+      <li><strong>Mixed insert/lookup/delete</strong> with tombstones, plus a concurrency stress test.</li>
+      <li><strong>Stretch: separate chaining</strong> with a per-bucket lock-free linked list, compared against linear probing at high load factors.</li>
+      <li><strong>Stretch: lazy dynamic resizing</strong> into a table of twice the capacity once a load-factor threshold is reached.</li>
+    </ol>
   </section>
 
   <section id="schedule">
@@ -87,42 +98,64 @@
             <td class="dates">Nov 9 – 15
               <span class="deadline">Proposal due Mon 11/9, 11:59 pm</span>
             </td>
-            <td class="plan" data-label="Plan">Submit proposal (Mon Nov 9). Confirm hardware access, record metadata and confirm interfaces. Build a CPU baseline reference, GPU initial insertion and lookup, and workload generator.</td>
-            <td class="owner" data-label="Owner">Jiaxi: hardware reference &amp; baseline reference.<br>Hongzheng: CUDA setup &amp; workload generator.</td>
-            <td class="status" data-label="Status"><span class="badge doing">In progress</span></td>
+            <td class="plan" data-label="Plan">Submit proposal. Baseline CPU implementation (OpenMP lock-free linear probing and <code>std::unordered_map</code>). Workload generator with uniform and Zipfian key distributions, unique and duplicate keys.</td>
+            <td class="owner" data-label="Owner">Jiaxi: CPU baseline.<br>Hongzheng: workload generator.</td>
+            <td class="status" data-label="Status"><span class="badge done">Done</span></td>
           </tr>
           <tr>
             <td class="num">2</td>
             <td class="dates">Nov 16 – 22</td>
-            <td class="plan" data-label="Plan">Complete baseline tests, implement the first cooperative probing mechanism, collect initial experiment data, establish cuCollection comparisons.</td>
-            <td class="owner" data-label="Owner">Jiaxi: tests and comparison harness.<br>Hongzheng: cooperative implementation.<br>Both: experiment profiling.</td>
-            <td class="status" data-label="Status"><span class="badge planned">Planned</span></td>
+            <td class="plan" data-label="Plan">Baseline tests and CPU benchmark. First GPU linear-probing table. Milestone report.</td>
+            <td class="owner" data-label="Owner">Jiaxi: tests, CPU benchmark, report.<br>Hongzheng: GPU linear probing, report.</td>
+            <td class="status" data-label="Status"><span class="badge done">Done</span></td>
           </tr>
           <tr>
             <td class="num">3</td>
-            <td class="dates">Nov 23 – 29
+            <td class="dates">Nov 23 – 25
               <span class="deadline">Milestone due Mon 11/23, 11:59 pm</span>
+            </td>
+            <td class="plan" data-label="Plan">Milestone report submitted. GPU correctness tests. Mixed-operation test design. Cooperative probing and first profiling pass (contention and divergence).</td>
+            <td class="owner" data-label="Owner">Jiaxi: mixed-op test design.<br>Hongzheng: cooperative probing and profiling.</td>
+            <td class="status" data-label="Status"><span class="badge doing">In progress</span></td>
+          </tr>
+          <tr>
+            <td class="num">3</td>
+            <td class="dates">Nov 26 – 29
               <span class="aside">Thanksgiving Thu 11/26</span>
             </td>
-            <td class="plan" data-label="Plan">Milestone report due Mon Nov 23. Begin mixed-operation support and targeted concurrency tests. Debugging and profiling is the main focus.</td>
-            <td class="owner" data-label="Owner">Jiaxi: mixed-operation semantics and tests.<br>Hongzheng: group-size and memory-access experiments.</td>
+            <td class="plan" data-label="Plan">Concurrent insert/lookup semantics and validation. Group-size sweep and probing-window tuning.</td>
+            <td class="owner" data-label="Owner">Jiaxi: concurrency semantics and validation.<br>Hongzheng: group-size sweep.</td>
             <td class="status" data-label="Status"><span class="badge planned">Planned</span></td>
           </tr>
           <tr>
             <td class="num">4</td>
-            <td class="dates">Nov 30 – Dec 6</td>
-            <td class="plan" data-label="Plan">Complete main experiment with mixed-operation validation, collect experiment data and measure performance. Start extended goals if the core goals are complete.</td>
-            <td class="owner" data-label="Owner">Both.</td>
+            <td class="dates">Nov 30 – Dec 2</td>
+            <td class="plan" data-label="Plan">Full benchmarks against cuCollections. Memory-access and contention optimizations (rungs 3–4).</td>
+            <td class="owner" data-label="Owner">Jiaxi: benchmarks vs. cuCollections.<br>Hongzheng: memory access and contention.</td>
+            <td class="status" data-label="Status"><span class="badge planned">Planned</span></td>
+          </tr>
+          <tr>
+            <td class="num">4</td>
+            <td class="dates">Dec 3 – 6</td>
+            <td class="plan" data-label="Plan">Stretch goals: separate chaining / deletion prototype; lazy dynamic resizing.</td>
+            <td class="owner" data-label="Owner">Jiaxi: separate chaining / deletion.<br>Hongzheng: lazy resizing.</td>
             <td class="status" data-label="Status"><span class="badge planned">Planned</span></td>
           </tr>
           <tr>
             <td class="num">5</td>
-            <td class="dates">Dec 7 – 11
+            <td class="dates">Dec 7 – 9</td>
+            <td class="plan" data-label="Plan">Final benchmark plots and (maybe) a demo video. Final report writing and profiling analysis.</td>
+            <td class="owner" data-label="Owner">Jiaxi: plots and demo.<br>Hongzheng: report and profiling analysis.</td>
+            <td class="status" data-label="Status"><span class="badge planned">Planned</span></td>
+          </tr>
+          <tr>
+            <td class="num">5</td>
+            <td class="dates">Dec 10 – 11
               <span class="deadline">Final report due Thu 12/10, 11:59 pm</span>
               <span class="deadline">Poster session Fri 12/11</span>
             </td>
-            <td class="plan" data-label="Plan">Final report due Thu Dec 10; poster session Fri Dec 11. Consolidate the final results. Complete final report and prepare the poster presentation.</td>
-            <td class="owner" data-label="Owner">Both.</td>
+            <td class="plan" data-label="Plan">Submit final report and finalize poster. Update webpage; poster session.</td>
+            <td class="owner" data-label="Owner">Jiaxi: final report and poster.<br>Hongzheng: webpage and poster session.</td>
             <td class="status" data-label="Status"><span class="badge planned">Planned</span></td>
           </tr>
         </tbody>
@@ -135,6 +168,10 @@
     <!-- Newest first. Copy an <li> to add an entry. -->
     <ol class="log">
       <li>
+        <time datetime="2026-11-23">Nov 23</time>
+        <div>Milestone report posted (<a href="reports/15418_milestone_report.pdf">PDF</a>). Goals restructured as a 7-rung optimization ladder in response to proposal feedback. CPU baseline done: the OpenMP lock-free table reaches 154 Mops insert / 93 Mops find at 8 threads (load factor 0.5, 4.2M keys), vs. 7 / 17 Mops for <code>std::unordered_map</code>. GPU linear-probing table written; correctness tests in progress.</div>
+      </li>
+      <li>
         <time datetime="2026-11-09">Nov 9</time>
         <div>Project proposal posted (<a href="reports/15418_proposal.pdf">PDF</a>).</div>
       </li>
@@ -146,7 +183,7 @@
 <footer class="site-foot">
   <div class="wrap">
     <p>15-418/618 Parallel Computer Architecture and Programming · Carnegie Mellon University · Fall 2026</p>
-    <p>Last updated <time datetime="2026-11-09">Nov 9, 2026</time></p>
+    <p>Last updated <time datetime="2026-11-23">Nov 23, 2026</time></p>
   </div>
 </footer>
 
